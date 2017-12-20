@@ -6,8 +6,10 @@
 package clientesservidores;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,85 +18,104 @@ import java.util.logging.Logger;
  *
  * @author User
  */
-public class Agent implements Runnable{
-    private Thread theThread=null;
-    private ServerSocket theServerSocket  =null;
-    private LinkedList <SocketController> theClients= new LinkedList<>();
-    private boolean quit=false;
+public class Agent implements Runnable {
+
+    private Thread theThread = null;
+    private ServerSocket theServerSocket = null;
+    private LinkedList<SocketController> theClients = new LinkedList<>();
+    private boolean quit = false;
     private int port;
 
-    public Agent(int newPort) throws IOException{
+    public Agent(int newPort) throws IOException {
         theServerSocket = new ServerSocket(newPort);
-        theThread= new Thread(this);
-        this.port= newPort;
+        theThread = new Thread(this);
+        this.port = newPort;
     }
-    
-    public void start(){
+
+    public void start() {
         theThread.start();
     }
-    
-    public  void stop(){
-        quit= true;
-        try{
+
+    public void stop() {
+        quit = true;
+        try {
             theServerSocket.close();
-           
-        }
-        catch(IOException ex)
-        {
-            Logger.getLogger(Agent.class.getName()).log(Level.SEVERE,null,ex);
+
+        } catch (IOException ex) {
+            Logger.getLogger(Agent.class.getName()).log(Level.SEVERE, null, ex);
         }
         theThread.stop();
     }
-    
-    public void sendAll(String text)
-    {
+
+    public void sendAll(String text) {
         for (SocketController theClient : theClients) {
             theClient.writeText(text);
         }
     }
-    public boolean connect(String aHostname)
-    {
+
+    public boolean connect(String aHostname) {
         SocketController socket = new SocketController(aHostname, this.port);
         socket.Open();
         theClients.add(socket);
         return true;
-        
-      
+
     }
-    
-    
-    public String mostrarIPS()
-    {
-        String cadena=" ";
-        for (SocketController cliente: theClients) {
-           cadena+=cliente.theSocket.getInetAddress().getHostAddress()+" , " ;          
-          
+
+    public void dividirIPs(String cadena) throws UnknownHostException {
+
+        String vector[] = cadena.split(",");
+
+        for (int i = 0; i < vector.length; i++) {
+            
+            if(!vector[i].trim().equals("") || !(Inet4Address.getLocalHost().getHostAddress().equals(vector[i])))
+            if (existIP(vector[i].trim())) {
+                connect(vector[i]);
+            }
+
         }
-         //cadena=cadena.substring(cadena.length()-1,cadena.length());
+
+    }
+
+    public boolean existIP(String ip) {
+
+        for (SocketController theClient : theClients) {
+
+            if (theClient.theSocket.getInetAddress().getHostAddress() == ip) {
+                return false;
+            }
+
+        }
+
+        return true;
+    }
+
+    public String mostrarIPS(){
+        String cadena = " ";
+        for (SocketController cliente : theClients) {
+            cadena += cliente.theSocket.getInetAddress().getHostAddress() + " , ";
+
+        }
+        //cadena=cadena.substring(cadena.length()-1,cadena.length());
         return cadena;
     }
-    
-    
+
     @Override
     public void run() {
-       Socket aSocket=null;
-       
-       while(!quit)
-       {
-          try{
-              aSocket= theServerSocket.accept();
-              SocketController socket= new SocketController(aSocket);
-              System.out.println("nuevo");
-              
-              theClients.add(socket);
-              //System.out.println(mostrarIPS());
-              socket.writeText(mostrarIPS()+" nO JUEGUES CON NOSOTROS");
-              //System.out.println(mostrarIPS());
-          }catch (IOException ex) 
-          {
-              quit=true;
-          }
-       }
+        Socket aSocket = null;
+
+        while (!quit) {
+            try {
+                aSocket = theServerSocket.accept();
+                SocketController socket = new SocketController(aSocket);
+
+                theClients.add(socket);
+
+                socket.writeText(Codigos.LISTA + " " + mostrarIPS());
+
+            } catch (IOException ex) {
+                quit = true;
+            }
+        }
     }
-    
+
 }

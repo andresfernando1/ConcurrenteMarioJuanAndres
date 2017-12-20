@@ -31,6 +31,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jdk.nashorn.internal.ir.CatchNode;
@@ -39,7 +40,7 @@ import jdk.nashorn.internal.ir.CatchNode;
  *
  * @author User
  */
-public class SocketController implements Runnable {
+    public class SocketController implements Runnable {
 
     private Thread theThread = null;
     public Socket theSocket = null;
@@ -47,7 +48,10 @@ public class SocketController implements Runnable {
     private BufferedReader theIn = null;
     private String host;
     private int port;
-
+    
+    private Agent agente;
+    
+    
     public SocketController(Socket newSocket) {
         theSocket = newSocket;
         try {
@@ -70,6 +74,16 @@ public class SocketController implements Runnable {
         
         
     }
+
+    public Agent getAgente() {
+        return agente;
+    }
+
+    public void setAgente(Agent agente) {
+        this.agente = agente;
+    }
+    
+    
     
      public void Open() {    
         try {
@@ -126,7 +140,14 @@ public class SocketController implements Runnable {
             System.out.println(command);
             if (command != null) {
                 //writeText(command);
-                if (command.trim().toUpperCase().equals("QUIT")) {
+                if(command.startsWith(""+Codigos.LISTA)){
+                    try {
+                        agente.dividirIPs(command.substring(4));
+                    } catch (UnknownHostException ex) {
+                        Logger.getLogger(SocketController.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                    if (command.trim().toUpperCase().equals("QUIT")) {
                     quit = true;
                 }
                 else
