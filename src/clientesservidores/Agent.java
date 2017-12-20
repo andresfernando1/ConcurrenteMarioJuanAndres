@@ -49,7 +49,7 @@ public class Agent implements Runnable{
     public void sendAll(String text)
     {
         for (SocketController theClient : theClients) {
-            theClient.writeText(mostrarIPS());
+            theClient.writeText(text);
         }
     }
     public boolean connect(String aHostname)
@@ -61,6 +61,8 @@ public class Agent implements Runnable{
         
       
     }
+    
+    
     public String mostrarIPS()
     {
         String cadena=" ";
