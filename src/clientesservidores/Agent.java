@@ -26,6 +26,8 @@ public class Agent implements Runnable {
     private boolean quit = false;
     private int port;
 
+    public Index index=null;
+    
     public Agent(int newPort) throws IOException {
         theServerSocket = new ServerSocket(newPort);
         theThread = new Thread(this);
@@ -53,10 +55,28 @@ public class Agent implements Runnable {
         }
     }
 
+    public void setIndex(Index index) {
+        this.index = index;
+    }
+
+     
+    public void send(String ip,String text){
+        
+        for (SocketController theClient : theClients) {
+            
+            if(theClient.theSocket.getInetAddress().getHostAddress().equals(ip)){
+                theClient.writeText(text);
+            }
+        }
+    }
+    
+    
     public boolean connect(String aHostname) {
         SocketController socket = new SocketController(aHostname, this.port);
         socket.Open();
         theClients.add(socket);
+        
+        this.index.agregarValores(socket.theSocket.getInetAddress().getHostAddress());
         socket.setAgente(this);
         return true;
 
@@ -70,7 +90,7 @@ public class Agent implements Runnable {
             if(!Inet4Address.getLocalHost().getHostAddress().equals(vector[i].trim())){
             if(!vector[i].trim().equals(""))
             if (existIP(vector[i].trim())) {
-                connect(vector[i]);
+                connect(vector[i].trim());
             }
             }
         }
@@ -108,9 +128,11 @@ public class Agent implements Runnable {
             try {
                 aSocket = theServerSocket.accept();
                 SocketController socket = new SocketController(aSocket);
-
-                theClients.add(socket);
+                
+                this.index.agregarValores(aSocket.getInetAddress().getHostAddress());
                 socket.setAgente(this);
+                theClients.add(socket);
+                
                 socket.writeText(Codigos.LISTA + " " + mostrarIPS());
 
             } catch (IOException ex) {

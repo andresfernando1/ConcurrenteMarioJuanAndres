@@ -69,6 +69,7 @@ import jdk.nashorn.internal.ir.CatchNode;
     
     public SocketController(String hostname, int port)
     {
+        
         this.port= port;
         this.host=hostname;
         
@@ -142,11 +143,20 @@ import jdk.nashorn.internal.ir.CatchNode;
                 //writeText(command);
                 if(command.startsWith(""+Codigos.LISTA)){
                     try {
+                        if(agente!=null)
                         agente.dividirIPs(command.substring(5));
                     } catch (UnknownHostException ex) {
                         Logger.getLogger(SocketController.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                }else{
+                
+                if(agente!=null){
+                    String vector[]=command.split(" ");
+                    this.agente.index.mensajeNuevo(vector[0].trim(),command.substring(14));
                 }
+                
+                }
+                    
                     if (command.trim().toUpperCase().equals("QUIT")) {
                     quit = true;
                 }
