@@ -92,7 +92,7 @@ import jdk.nashorn.internal.ir.CatchNode;
             this.theIn = new BufferedReader(new InputStreamReader(
                     this.theSocket.getInputStream(), "UTF-8"));
         } catch (IOException ex) {
-            System.out.println("No se pudo conectar");
+            System.out.println("No se pudo conectar a:"+this.host+" ,"+this.port);
         }
         
         Thread hilo= new Thread(this);
@@ -142,7 +142,7 @@ import jdk.nashorn.internal.ir.CatchNode;
                 //writeText(command);
                 if(command.startsWith(""+Codigos.LISTA)){
                     try {
-                        agente.dividirIPs(command.substring(4));
+                        agente.dividirIPs(command.substring(5));
                     } catch (UnknownHostException ex) {
                         Logger.getLogger(SocketController.class.getName()).log(Level.SEVERE, null, ex);
                     }

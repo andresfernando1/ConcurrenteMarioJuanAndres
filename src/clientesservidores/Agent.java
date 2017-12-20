@@ -57,6 +57,7 @@ public class Agent implements Runnable {
         SocketController socket = new SocketController(aHostname, this.port);
         socket.Open();
         theClients.add(socket);
+        socket.setAgente(this);
         return true;
 
     }
@@ -66,12 +67,12 @@ public class Agent implements Runnable {
         String vector[] = cadena.split(",");
 
         for (int i = 0; i < vector.length; i++) {
-            
-            if(!vector[i].trim().equals("") || !(Inet4Address.getLocalHost().getHostAddress().equals(vector[i])))
+            if(!Inet4Address.getLocalHost().getHostAddress().equals(vector[i].trim())){
+            if(!vector[i].trim().equals(""))
             if (existIP(vector[i].trim())) {
                 connect(vector[i]);
             }
-
+            }
         }
 
     }
@@ -109,7 +110,7 @@ public class Agent implements Runnable {
                 SocketController socket = new SocketController(aSocket);
 
                 theClients.add(socket);
-
+                socket.setAgente(this);
                 socket.writeText(Codigos.LISTA + " " + mostrarIPS());
 
             } catch (IOException ex) {
